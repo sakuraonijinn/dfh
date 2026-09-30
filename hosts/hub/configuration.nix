@@ -5,7 +5,7 @@
 {
   networking.hostName = "phone-lab";
 
-  sdcardStore.uuid = "749493b1-e85c-476d-88ed-4b25eb84f157";
+  sdcardStore.uuid = "a29fbc70-66c5-4131-b3fd-74866da78df6";
 
   users.users.sakura = {
     isNormalUser = true;
@@ -19,14 +19,14 @@
     hashedPasswordFile = "/etc/nixos/secrets/sakura.hash";
   };
 
-  virtualisation.docker = {
-    enable = true;
+#  virtualisation.docker = {
+ #   enable = true;
     # Docker images live outside the Nix store and aren't touched by
     # nix.gc — on a 30G disk they're the most likely thing to blow your
     # budget. Point at bigger/separate storage if you have it:
     # daemon.settings.data-root = "/mnt/bigger-disk/docker";
     # Otherwise: `docker system prune -af --volumes` regularly.
-  };
+ # };
 
   environment.systemPackages = with pkgs; [
     # ── Core Android / APK workflow ──
@@ -45,11 +45,14 @@
     ]))
 
     # ── General utilities not already in common.nix ──
-    neovim vim opencode file binutils x
+    neovim vim opencode file binutils
 
     # ── Genymotion / Android emulator ──
-    genymotion
-    virtualbox
+    # Temporarily removed while phone-lab is first built: both pull large
+    # unfree closures and the GUI stack is what we want working first.
+    # Re-add `genymotion` (packaged locally in modules/genymotion.nix, wired
+    # into the flake as packages.default) and `virtualbox` here once the
+    # base system boots. See modules/genymotion.nix.
   ];
 
   # ── Convenience shell functions ──

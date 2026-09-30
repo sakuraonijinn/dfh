@@ -12,6 +12,17 @@
       system = "x86_64-linux";
     in
     {
+      # Genymotion's official Linux package is a closed-source .bin installer
+      # that nixpkgs dropped, so it is packaged locally in
+      # ./modules/genymotion.nix and exposed as its own package output.
+      # It is deliberately NOT a NixOS module: it is a plain package
+      # expression ({ lib, which, stdenv, ... }: stdenv.mkDerivation), so
+      # listing it in a nixosConfiguration's `modules` list makes the
+      # module system recurse infinitely (it takes module args and hands
+      # them back to itself).
+      packages.${system}.default = nixpkgs.legacyPackages.${system}.callPackage
+        ./modules/genymotion.nix { };
+
       nixosConfigurations = {
 
         "phone-lab" = nixpkgs.lib.nixosSystem {
