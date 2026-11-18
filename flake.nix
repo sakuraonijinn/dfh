@@ -28,6 +28,34 @@
           ];
         };
 
+        # ── red: libvirt guest on phone-lab, built as a qcow2 image ──
+        # Build with:  nix build .#nixosConfigurations.redbox.config.system.build.image
+        # Then register it:  virt-install --connect qemu:///system --name redbox \
+        #   --memory 4096 --vcpus 2 \
+        #   --disk path=<abs path>/redbox.qcow2,format=qcow2,bus=virtio \
+        #   --network network=default,model=virtio --import --noautoconsole
+        redbox = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            ./hosts/redbox/configuration.nix
+            ({ pkgs, lib, config, ... }: {
+              # Raw qcow2 image, single ext4 partition labelled "nixos", MBR
+              # boot (matches hosts/redbox/configuration.nix fileSystems).
+              # Disk size is fixed at build time — rebuild the image to grow it.
+              system.build.image = import "${pkgs.path}/nixos/lib/make-disk-image.nix" {
+                inherit lib config pkgs;
+                name = "redbox-image";
+                baseName = "redbox";
+                format = "qcow2";
+                diskSize = 10240;       # MB; guest closure is ~6-8GB
+                partitionTableType = "legacy";
+                installBootLoader = true;
+                copyChannel = false;
+              };
+            })
+          ];
+        };
+
         # ── frp: MediaTek flashing/recovery box, sdcard-backed store ──
         # Attribute name matches networking.hostName ("frpbox") in
         # hosts/frp/configuration.nix — same reasoning as phone-lab above.
